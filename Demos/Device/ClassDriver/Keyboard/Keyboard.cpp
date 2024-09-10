@@ -43,21 +43,21 @@ static uint8_t PrevKeyboardHIDReportBuffer[sizeof(USB_KeyboardReport_Data_t)] AT
  *  passed to all HID Class driver functions, so that multiple instances of the same class
  *  within a device can be differentiated from one another.
  */
-USB_ClassInfo_HID_Device_t Keyboard_HID_Interface ATTR_ALIGNED(2) =
-	{
-		.Config =
-			{
-				.InterfaceNumber              = INTERFACE_ID_Keyboard,
-				.ReportINEndpoint             =
-					{
-						.Address              = KEYBOARD_EPADDR,
-						.Size                 = KEYBOARD_EPSIZE,
-						.Banks                = 1,
-					},
-				.PrevReportINBuffer           = PrevKeyboardHIDReportBuffer,
-				.PrevReportINBufferSize       = sizeof(PrevKeyboardHIDReportBuffer),
-			},
-	};
+USB_ClassInfo_HID_Device_t ATTR_ALIGNED(2) Keyboard_HID_Interface;
+// 	{
+// 		.Config =
+// 			{
+// 				.InterfaceNumber              = INTERFACE_ID_Keyboard,
+// 				.ReportINEndpoint             =
+// 					{
+// 						.Address              = KEYBOARD_EPADDR,
+// 						.Size                 = KEYBOARD_EPSIZE,
+// 						.Banks                = 1,
+// 					},
+// 				.PrevReportINBuffer           = PrevKeyboardHIDReportBuffer,
+// 				.PrevReportINBufferSize       = sizeof(PrevKeyboardHIDReportBuffer),
+// 			},
+// 	};
 
 
 /** Main program entry point. This routine contains the overall program flow, including initial
@@ -65,6 +65,13 @@ USB_ClassInfo_HID_Device_t Keyboard_HID_Interface ATTR_ALIGNED(2) =
  */
 int main(void)
 {
+	Keyboard_HID_Interface.Config.InterfaceNumber              = INTERFACE_ID_Keyboard;
+	Keyboard_HID_Interface.Config.ReportINEndpoint.Address              = KEYBOARD_EPADDR;
+	Keyboard_HID_Interface.Config.ReportINEndpoint.Size                 = KEYBOARD_EPSIZE;
+	Keyboard_HID_Interface.Config.ReportINEndpoint.Banks                = 1;
+	Keyboard_HID_Interface.Config.PrevReportINBuffer           = PrevKeyboardHIDReportBuffer;
+	Keyboard_HID_Interface.Config.PrevReportINBufferSize       = sizeof(PrevKeyboardHIDReportBuffer);
+	
 	SetupHardware();
 
 	LEDs_SetAllLEDs(LEDMASK_USB_NOTREADY);
