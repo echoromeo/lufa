@@ -38,7 +38,6 @@
 
 	/* Includes: */
 		#include <avr/io.h>
-		#include <avr/boot.h>
 		#include <util/atomic.h>
 		#include <stdbool.h>
 
