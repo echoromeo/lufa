@@ -132,6 +132,10 @@
 			#include <math.h>
 			#include <util/delay.h>
 
+			#if (ARCH == ARCH_AVRDX)
+				#include "../Drivers/Peripheral/AVRDX/boot_AVRDX.h"
+			#endif
+
 			typedef uint8_t uint_reg_t;
 
 			#define ARCH_HAS_EEPROM_ADDRESS_SPACE

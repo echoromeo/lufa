@@ -37,6 +37,7 @@
 #define _DESCRIPTORS_H_
 
 	/* Includes: */
+		#include <avr/io.h>
 		#include <LUFA/Drivers/USB/USB.h>
 
 		#include "Config/AppConfig.h"
@@ -120,6 +121,11 @@
 			#define AVR_SIGNATURE_1               0x1E
 			#define AVR_SIGNATURE_2               0x93
 			#define AVR_SIGNATURE_3               0x82
+		#elif defined(__AVR_AVR64DU32__)
+			#define PRODUCT_ID_CODE               0x2FF7 // #TODO: What is this???
+			#define AVR_SIGNATURE_1               SIGNATURE_0
+			#define AVR_SIGNATURE_2               SIGNATURE_1
+			#define AVR_SIGNATURE_3               SIGNATURE_2
 		#else
 			#error The selected AVR part is not currently supported by this bootloader.
 		#endif

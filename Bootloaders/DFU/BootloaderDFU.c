@@ -131,6 +131,18 @@ void Application_Jump_Check(void)
 
 		/* Re-enable JTAG debugging */
 		JTAG_ENABLE();
+
+	#elif (BOARD == BOARD_AVR64DU32_CNANO)
+		/* Enable pull-up on PF6 so we can use it to select the mode */
+		PORTF.PIN6CTRL = (PORT_PULLUPEN_bm | PORT_INVEN_bm);
+
+		Delay_MS(10);
+
+		/* If PF6 is not pulled to ground, start the user application instead */
+		JumpToApplication = ((PORTF.IN & PIN6_bm) != 0);
+
+		/* Disable pull-up after the check has completed */
+		PORTF.PIN6CTRL = 0;
 	#else
 		/* Check if the device's BOOTRST fuse is set */
 		if (!(BootloaderAPI_ReadFuse(GET_HIGH_FUSE_BITS) & ~FUSE_BOOTRST))
@@ -160,10 +172,11 @@ void Application_Jump_Check(void)
 	/* If a request has been made to jump to the user application, honor it */
 	if (JumpToApplication && ApplicationValid)
 	{
+#if (ARCH == ARCH_AVR8)
 		/* Turn off the watchdog */
 		MCUSR &= ~(1 << WDRF);
 		wdt_disable();
-
+#endif
 		/* Clear the boot key and jump to the user application */
 		MagicBootKey = 0;
 
@@ -204,6 +217,7 @@ int main(void)
 /** Configures all hardware required for the bootloader. */
 static void SetupHardware(void)
 {
+#if (ARCH == ARCH_AVR8)
 	/* Disable watchdog if enabled by bootloader/fuses */
 	MCUSR &= ~(1 << WDRF);
 	wdt_disable();
@@ -215,13 +229,27 @@ static void SetupHardware(void)
 	MCUCR = (1 << IVCE);
 	MCUCR = (1 << IVSEL);
 
+#elif (ARCH == ARCH_AVRDX)
+	/* Configure the OSCHF to run at F_CPU with SOF Autotune enabled */
+	AVRDXCLK_ConfigureOSCHF(F_CPU, AUTOTUNE_SOF_BIN);
+	AVRDXCLK_SetCPUClockSource(CLOCK_SRC_INT_OSCHF);
+
+	/* Relocate the interrupt vector table to the bootloader section */
+	_PROTECTED_WRITE(CPUINT.CTRLA, CPUINT_IVSEL_bm);
+#endif
+
 	/* Initialize the USB and other board hardware drivers */
 	USB_Init();
 	LEDs_Init();
 
+#if (ARCH == ARCH_AVR8)
 	/* Bootloader active LED toggle timer initialization */
 	TIMSK1 = (1 << TOIE1);
 	TCCR1B = ((1 << CS11) | (1 << CS10));
+#elif (ARCH == ARCH_AVRDX)
+	/* TODO: Bootloader active LED toggle timer initialization */
+
+#endif
 }
 
 /** Resets all configured hardware required for the bootloader back to their original states. */
@@ -231,6 +259,7 @@ static void ResetHardware(void)
 	USB_Disable();
 	LEDs_Disable();
 
+#if (ARCH == ARCH_AVR8)
 	/* Disable Bootloader active LED toggle timer */
 	TIMSK1 = 0;
 	TCCR1B = 0;
@@ -238,13 +267,25 @@ static void ResetHardware(void)
 	/* Relocate the interrupt vector table back to the application section */
 	MCUCR = (1 << IVCE);
 	MCUCR = 0;
+
+#elif (ARCH == ARCH_AVRDX)
+	/* Disable Bootloader active LED toggle timer */
+
+	/* Relocate the interrupt vector table back to the application section */
+	_PROTECTED_WRITE(CPUINT.CTRLA, 0);
+
+#endif
 }
 
+#if (ARCH == ARCH_AVR8)
 /** ISR to periodically toggle the LEDs on the board to indicate that the bootloader is active. */
 ISR(TIMER1_OVF_vect, ISR_BLOCK)
 {
 	LEDs_ToggleLEDs(LEDS_LED1 | LEDS_LED2);
 }
+#elif (ARCH == ARCH_AVRDX)
+// TODO: Timer ISR
+#endif
 
 /** Event handler for the USB_ControlRequest event. This is used to catch and process control requests sent to
  *  the device from the USB host before passing along unhandled control requests to the library for processing

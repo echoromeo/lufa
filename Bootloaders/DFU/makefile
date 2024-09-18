@@ -11,10 +11,10 @@
 
 # Run "make help" for target help.
 
-MCU          = at90usb1287
-ARCH         = AVR8
-BOARD        = USBKEY
-F_CPU        = 8000000
+MCU          = AVR64DU32
+ARCH         = AVRDX
+BOARD        = AVR64DU32_CNANO
+F_CPU        = 24000000
 F_USB        = $(F_CPU)
 OPTIMIZATION = s
 TARGET       = BootloaderDFU
@@ -24,10 +24,13 @@ CC_FLAGS     = -DUSE_LUFA_CONFIG_HEADER -IConfig/ -DBOOT_START_ADDR=$(BOOT_START
 LD_FLAGS     = -Wl,--section-start=.text=$(BOOT_START_OFFSET) $(BOOT_API_LD_FLAGS)
 LTO          = Y
 
+CC_FLAGS += -B"C:/PROGRA~2/Atmel/Studio/7.0/packs/atmel/AVR-Dx_DFP/2.6.303/gcc/dev/avr64du32" -I"C:/PROGRA~2/Atmel/Studio/7.0/packs/atmel/AVR-Dx_DFP/2.6.303/include"
+LD_FLAGS += -B"C:/PROGRA~2/Atmel/Studio/7.0/packs/atmel/AVR-Dx_DFP/2.6.303/gcc/dev/avr64du32"
+
 # Flash size and bootloader section sizes of the target, in KB. These must
 # match the target's total FLASH size and the bootloader size set in the
 # device's fuses.
-FLASH_SIZE_KB         = 128
+FLASH_SIZE_KB         = 64
 BOOT_SECTION_SIZE_KB  = 8
 
 # Bootloader address calculation formulas

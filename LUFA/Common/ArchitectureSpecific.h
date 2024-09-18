@@ -146,6 +146,11 @@
 				                                                            __FILE__, __func__, __LINE__, #Condition); \
 				                                        } while (0)
 
+				#if !defined(SPM_PAGESIZE)
+				  // TODO: Add explanation 
+				  #define SPM_PAGESIZE             PROGMEM_PAGE_SIZE
+				#endif	
+
 				#if !defined(pgm_read_ptr) || defined(__DOXYGEN__)
 					/** Reads a pointer out of PROGMEM space on the AVR8 architecture. This is a wrapper for the avr-libc
 					 *  \c pgm_read_word() macro with a \c void* cast, so that its value can be assigned directly to a
